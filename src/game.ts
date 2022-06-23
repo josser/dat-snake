@@ -2,14 +2,14 @@ import { GameState } from "./state/game";
 import { ScreenBufferHD, Terminal } from "terminal-kit";
 import { autoInjectable, inject } from "tsyringe";
 import { SnakeDirection } from "./state/snake";
-import { fieldHeight } from "./config";
+import { fieldHeight, fieldWidth } from "./config";
 
 @autoInjectable()
 export class SnakeGame {
   private screen: ScreenBufferHD;
 
   constructor(private gameState: GameState, @inject('term') private term: Terminal) {
-    this.screen = new ScreenBufferHD({ dst: term, width: 120, height: 45 });
+    this.screen = new ScreenBufferHD({ dst: term, width: fieldWidth, height: fieldHeight });
   }
 
   async start() {
