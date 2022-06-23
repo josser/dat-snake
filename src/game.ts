@@ -41,6 +41,8 @@ export class SnakeGame {
       }
       this.redraw();
     });
+
+    this.redraw();
   }
 
   moveLeft() {
@@ -103,6 +105,6 @@ export class SnakeGame {
 
   exit(code: number) {
     console.log('Bye!');
-    process.exit(code);
+    this.term.processExit(code);
   }
 }
