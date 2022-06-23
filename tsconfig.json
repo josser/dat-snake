@@ -1,0 +1,18 @@
+{
+  "extends": "@tsconfig/node16/tsconfig.json",
+  "exclude": [
+    "node_modules",
+    "dist",
+    "**/node_modules/*"
+  ],
+  "compilerOptions": {
+    "rootDirs": [
+      "src",
+    ],
+    "baseUrl": "./src",
+    "outDir": "dist",
+    // for tsyringe / decorators
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true
+  },
+}
