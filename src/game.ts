@@ -1,44 +1,58 @@
 import { GameState } from "./state/game";
-import { ScreenBufferHD, Terminal } from "terminal-kit";
+import { ScreenBuffer, Terminal } from "terminal-kit";
 import { autoInjectable, inject } from "tsyringe";
 import { SnakeDirection } from "./state/snake";
 import { fieldHeight, fieldWidth } from "./config";
 
 @autoInjectable()
 export class SnakeGame {
-  private screen: ScreenBufferHD;
+  private screen: ScreenBuffer;
 
   constructor(private gameState: GameState, @inject('term') private term: Terminal) {
-    this.screen = new ScreenBufferHD({ dst: term, width: fieldWidth, height: fieldHeight });
+    this.screen = new ScreenBuffer({ dst: term, width: fieldWidth, height: fieldHeight });
   }
 
-  async start() {
+  resetField() {
+    this.screen.fill({
+      attr: {
+        bgColor: 0,
+      }
+    });
+  }
+
+  start() {
     this.gameState.init();
     this.term.grabInput({});
 
     this.term.on('key', (key: string) => {
+      let result = true;
       switch (key) {
         case 'CTRL_C':
           this.exit(0);
           break;
         case 'LEFT':
-          this.moveLeft()
+          result = this.moveLeft()
           break;
         case 'RIGHT':
-          this.moveRight()
+          result = this.moveRight()
           break;
         case 'UP':
-          this.moveUp()
+          result = this.moveUp()
           break;
         case 'DOWN':
-          this.moveDown()
+          result = this.moveDown()
           break;
         case 'q':
           this.exit(0);
           break;
         default:
-          this.idle();
+          result = this.idle();
       }
+
+      if (!result) {
+        this.gameState.init();
+      }
+
       this.redraw();
     });
 
@@ -46,30 +60,33 @@ export class SnakeGame {
   }
 
   moveLeft() {
-    this.gameState.move(SnakeDirection.Left);
+   return this.gameState.move(SnakeDirection.Left);
   }
 
   moveRight() {
-    this.gameState.move(SnakeDirection.Right);
+    return this.gameState.move(SnakeDirection.Right);
   }
   moveUp() {
-    this.gameState.move(SnakeDirection.Up);
+    return this.gameState.move(SnakeDirection.Up);
   }
   moveDown() {
-    this.gameState.move(SnakeDirection.Down);
+    return this.gameState.move(SnakeDirection.Down);
   }
 
   idle() {
     this.redraw();
+    return true;
   }
 
   redraw() {
-    this.screen.clear();
+    this.resetField();
     this.gameState.snake.body.forEach(segment => {
       this.screen.put({
         x: segment.x,
         y: segment.y,
-        attr: {},
+        attr: {
+          bgColor: 0,
+        },
         wrap: false,
         dx: 0,
         dy: 0
@@ -80,7 +97,7 @@ export class SnakeGame {
       x: this.gameState.food.x,
       y: this.gameState.food.y,
       attr: {
-        color: 255,
+        color: 2,
         bgColor: 0,
       },
       wrap: false,
@@ -92,7 +109,7 @@ export class SnakeGame {
       x: 0,
       y: fieldHeight - 1,
       attr: {
-        color: 255,
+        color: 2,
         bgColor: 0,
       },
       wrap: false,
@@ -104,7 +121,6 @@ export class SnakeGame {
   }
 
   exit(code: number) {
-    console.log('Bye!');
     this.term.processExit(code);
   }
 }
