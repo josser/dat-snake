@@ -1,16 +1,17 @@
 import { GameState } from "./state/game";
-import { ScreenBuffer, Terminal } from "terminal-kit";
+import { Rect, ScreenBuffer, Terminal } from "terminal-kit";
 import { autoInjectable, inject } from "tsyringe";
 import { SnakeDirection } from "./state/snake";
-import { fieldHeight, fieldWidth } from "./config";
+import { IConfig } from "./config";
 
 @autoInjectable()
 export class SnakeGame {
-  private screen: ScreenBuffer;
-
-  constructor(private gameState: GameState, @inject('term') private term: Terminal) {
-    this.screen = new ScreenBuffer({ dst: term, width: fieldWidth, height: fieldHeight });
-  }
+  constructor(
+    private gameState: GameState,
+    @inject('term') private term: Terminal,
+    @inject('screenbuffer') private screen: ScreenBuffer,
+    @inject('config') private config: IConfig,
+  ) { }
 
   resetField() {
     this.screen.fill({
@@ -18,6 +19,18 @@ export class SnakeGame {
         bgColor: 0,
       }
     });
+    this.screen.fill({
+      // @ts-ignore
+      region: new Rect({
+        x: 0,
+        y: this.config.fieldHeight - 1,
+        width: this.config.fieldWidth,
+        height: 1
+      }),
+      attr: {
+        bgColor: 8,
+     },
+    })
   }
 
   start() {
@@ -107,10 +120,10 @@ export class SnakeGame {
 
     this.screen.put({
       x: 0,
-      y: fieldHeight - 1,
+      y: this.config.fieldHeight - 1,
       attr: {
         color: 2,
-        bgColor: 0,
+        bgColor: 8,
       },
       wrap: false,
       dx: 1,

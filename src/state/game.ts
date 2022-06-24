@@ -1,7 +1,7 @@
 import { Snake, SnakeDirection } from "./snake";
 import { Food } from './food';
-import { injectable } from "tsyringe";
-import { fieldHeight, fieldWidth } from "../config";
+import { inject, injectable } from "tsyringe";
+import { IConfig } from "../config";
 
 const directionMap = {
   [SnakeDirection.Left]: { x: -1, y: 0 },
@@ -13,11 +13,11 @@ const directionMap = {
 @injectable()
 export class GameState {
   score = 0;
-  constructor(public snake: Snake, public food: Food) {}
+  constructor(public snake: Snake, public food: Food, @inject('config') private config: IConfig) {}
 
   init() {
-    this.snake.init({ width: fieldWidth, height: fieldHeight });
-    this.food.init({ width: fieldWidth, height: fieldHeight });
+    this.snake.init({ width: this.config.fieldWidth, height: this.config.fieldHeight });
+    this.food.init({ width: this.config.fieldWidth, height: this.config.fieldHeight });
     this.score = 0
   }
 
@@ -35,7 +35,7 @@ export class GameState {
     const delta = directionMap[direction];
     const head = this.snake.body[0];
     const newHead = { x: head.x + delta.x, y: head.y + delta.y };
-    if (newHead.x <= 0 || newHead.x >= fieldWidth - 1 || newHead.y <= 0 || newHead.y >= fieldHeight - 1) {
+    if (newHead.x <= -1 || newHead.x >= this.config.fieldWidth - 1 || newHead.y <= -1 || newHead.y >= this.config.fieldHeight - 1) {
       return true;
     }
     if (this.snake.body.some(segment => segment.x === newHead.x && segment.y === newHead.y)) {
@@ -49,7 +49,7 @@ export class GameState {
     const newHead = { x: head.x + delta.x, y: head.y + delta.y };
     if (this.food.x === newHead.x && this.food.y === newHead.y) {
       this.score++;
-      this.food.init({ width: fieldWidth, height: fieldHeight });
+      this.food.init({ width: this.config.fieldWidth, height: this.config.fieldHeight });
       this.snake.grow(direction);
     }
   }
